@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const response = await fetch(
-      `${process.env.API_URL}/dev/auth`,
+      `${process.env.NEXT_PUBLIC_API_URL}/dev/auth`,
       // "https://n4k59xn7r1.execute-api.eu-central-1.amazonaws.com/dev/auth",
       {
         method: "POST",

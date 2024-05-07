@@ -22,14 +22,17 @@ export async function POST(req: NextRequest) {
     return new Response("Unauthorized", { status: 401 });
   }
   try {
-    const response = await fetch(`${process.env.API_URL}/dev/auth`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Session: session,
-      },
-      body: JSON.stringify(body),
-    });
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/dev/auth`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Session: session,
+        },
+        body: JSON.stringify(body),
+      }
+    );
 
     const token = response.headers.get("Set-Cookie");
     if (!token || token.length === 0) {

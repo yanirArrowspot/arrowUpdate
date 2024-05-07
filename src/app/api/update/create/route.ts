@@ -64,14 +64,17 @@ const createUpdate = async (data: updateData, token: string) => {
   };
 
   try {
-    const response = await fetch(`${process.env.API_URL}/dev/update/create`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(body),
-    });
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/dev/update/create`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      }
+    );
     if (response.status !== 200) throw Error();
     const data = await response.json();
 

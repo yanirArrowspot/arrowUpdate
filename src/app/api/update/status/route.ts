@@ -10,13 +10,16 @@ export async function GET(req: NextRequest, res: NextApiResponse) {
   }
 
   try {
-    const response = await fetch(`${process.env.API_URL}/dev/status`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/dev/status`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     const data = await response.json();
     // Handle the response (e.g., successful authentication or further action required)
     return NextResponse.json(data, {
