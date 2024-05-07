@@ -141,7 +141,7 @@ export default function Dashboard() {
       console.error("Error during fetch:", error);
     }
     // Handle response
-  }, [apiCall, fetchAllJobs]);
+  }, []);
 
   useEffect(() => {
     fetchAllDevices();
