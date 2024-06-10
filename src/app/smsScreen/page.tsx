@@ -8,11 +8,11 @@ import logo from "../../../public/logo.png";
 import { apiCall } from "@/utils/utilApi";
 import Spinner from "../components/spinner/Spinner";
 
-type Props = {
+type SMSDashboardProps = {
   setScreen: React.Dispatch<React.SetStateAction<string>>;
 };
 
-export default function SMSDashboard({ setScreen }: Props) {
+export default function SMSDashboard({ setScreen }: SMSDashboardProps) {
   const [deviceIds, setDeviceIds] = useState<string[]>([]);
   const [command, setCommand] = useState("");
   const [disableBtn, setDisableBtn] = useState(false);
