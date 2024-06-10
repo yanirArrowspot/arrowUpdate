@@ -26,9 +26,12 @@ export const apiCall = async <T>(
       credentials: "include", // Or dynamically from options if necessary
       ...options,
     });
+    console.log({ response });
 
     if (response.ok) {
       const data: T = await response.json();
+      console.log({ data });
+
       return { success: true, data };
     } else {
       let errorData;

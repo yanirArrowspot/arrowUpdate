@@ -11,6 +11,7 @@ import Spinner from "../components/spinner/Spinner";
 import { useDevicesStore, useUserStore } from "@/store/store";
 import Dialog from "../components/dialog/Dialog";
 import { pbkdf2Sync, randomBytes } from "crypto";
+import SMSDashboard from "../SMSDashboard/page";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -27,6 +28,7 @@ export default function Dashboard() {
   const [versions, setVersions] = useState([]);
   const [isAllDevicesSelected, setIsAllDevicesSelected] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [screen, setScreen] = useState("update");
 
   // const fetchAllDevices = async () => {
   //   try {
@@ -293,6 +295,10 @@ export default function Dashboard() {
     }
   };
 
+  const handleSMSScreen = () => {
+    setScreen("sms");
+  };
+
   const handleCloseDialog = () => {
     setShowModal(false);
     resetState();
@@ -313,6 +319,14 @@ export default function Dashboard() {
     <>
       {showModal ? dialog : null}
       <Image src={logo} alt="Logo" className="mb-2 ml-16 w-1/5" priority />
+      <button
+        disabled={disableBtn}
+        type="button"
+        className="inline-block rounded bg-neutral-800 px-6 pb-2 m-1 pt-2.5 text-sm font-medium uppercase leading-normal text-neutral-50 shadow-dark-3 transition duration-150 ease-in-out hover:bg-neutral-700 hover:shadow-dark-2 focus:bg-neutral-700 focus:shadow-dark-2 focus:outline-none focus:ring-0 active:bg-neutral-900 active:shadow-dark-2 motion-reduce:transition-none dark:shadow-black/30 dark:hover:shadow-dark-strong dark:focus:shadow-dark-strong dark:active:shadow-dark-strong"
+        onClick={handleSMSScreen}
+      >
+        SMS Screen
+      </button>
       <Toast toastState={toastState} toastText={toastText} />
       <h1 className="text-2xl font-bold p-4">All devices</h1>
       <div
@@ -409,13 +423,23 @@ export default function Dashboard() {
     </>
   );
 
+  // const sms = (
+  //   <S
+  // )
+
   return (
-    <div className="flex flex-col items-center p-6 pb-8 h-screen">
-      {devices?.length === 0 && versions?.length === 0 ? (
-        <Spinner height="12" width="12" type="circle" />
+    <>
+      {screen === "update" ? (
+        <div className="flex flex-col items-center p-6 pb-8 h-screen">
+          {devices?.length === 0 && versions?.length === 0 ? (
+            <Spinner height="12" width="12" type="circle" />
+          ) : (
+            dashboard
+          )}
+        </div>
       ) : (
-        dashboard
+        <SMSDashboard setScreen={setScreen} />
       )}
-    </div>
+    </>
   );
 }
