@@ -11,7 +11,7 @@ import Spinner from "../components/spinner/Spinner";
 import { useDevicesStore, useUserStore } from "@/store/store";
 import Dialog from "../components/dialog/Dialog";
 import { pbkdf2Sync, randomBytes } from "crypto";
-import SMSDashboard from "../smsScreen/page";
+import { SMSDashboard } from "../smsScreen/page";
 
 export default function Dashboard() {
   const router = useRouter();

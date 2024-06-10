@@ -12,7 +12,7 @@ type Props = {
   setScreen: React.Dispatch<React.SetStateAction<string>>;
 };
 
-export default function SMSDashboard(props: Props) {
+export const SMSDashboard = ({ setScreen }: Props) => {
   const [deviceIds, setDeviceIds] = useState<string[]>([]);
   const [command, setCommand] = useState("");
   const [disableBtn, setDisableBtn] = useState(false);
@@ -248,7 +248,7 @@ export default function SMSDashboard(props: Props) {
           disabled={disableBtn}
           type="button"
           className="mb-2 inline-block rounded bg-neutral-800 px-6 pb-2 pt-2.5 m-1 text-sm font-medium uppercase leading-normal text-neutral-50 shadow-dark-3 transition duration-150 ease-in-out hover:bg-neutral-700 focus:outline-none focus:ring-0 active:bg-neutral-900"
-          onClick={() => props.setScreen("update")}
+          onClick={() => setScreen("update")}
         >
           Update Screen
         </button>
@@ -319,4 +319,4 @@ export default function SMSDashboard(props: Props) {
       </div>
     </div>
   );
-}
+};
