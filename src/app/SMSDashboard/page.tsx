@@ -12,7 +12,7 @@ type Props = {
   setScreen: React.Dispatch<React.SetStateAction<string>>;
 };
 
-const SMSDashboard = ({ setScreen }: Props) => {
+export default function SMSDashboard({ setScreen }: Props) {
   const [deviceIds, setDeviceIds] = useState<string[]>([]);
   const [command, setCommand] = useState("");
   const [disableBtn, setDisableBtn] = useState(false);
@@ -319,6 +319,4 @@ const SMSDashboard = ({ setScreen }: Props) => {
       </div>
     </div>
   );
-};
-
-export default SMSDashboard;
+}
