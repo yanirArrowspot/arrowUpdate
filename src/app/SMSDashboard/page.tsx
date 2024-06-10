@@ -238,86 +238,6 @@ const SMSDashboard = ({ setScreen }: Props) => {
   );
 
   return (
-    // <div className="bg-slate-50 h-screen p-4">
-    //   <div className="flex flex-col items-center ">
-    //     <Image src={logo} alt="Logo" className="m-4" width={250} />
-    //     <h1 className="text-3xl font-bold mb-2 text-center text-cyan-950">
-    //       ArrowSpot SMS Sender
-    //     </h1>
-    //     <button
-    //       disabled={disableBtn}
-    //       type="button"
-    //       className="inline-block rounded bg-neutral-800 px-6 pb-2 m-1 pt-2.5 text-sm font-medium uppercase leading-normal text-neutral-50 shadow-dark-3 transition duration-150 ease-in-out hover:bg-neutral-700 hover:shadow-dark-2 focus:bg-neutral-700 focus:shadow-dark-2 focus:outline-none focus:ring-0 active:bg-neutral-900 active:shadow-dark-2 motion-reduce:transition-none dark:shadow-black/30 dark:hover:shadow-dark-strong dark:focus:shadow-dark-strong dark:active:shadow-dark-strong"
-    //       onClick={() => setScreen("update")}
-    //     >
-    //       Update Screen
-    //     </button>
-    //   </div>
-    //   <div className="p-6 px-12 flex flex-row-reverse gap-4  rounded-[7px]  !border-2  !border-gray-300 border-t-transparent">
-    //     <div className="w-1/3 justify-center ">
-    //       <div className="max-w-md ">
-    //         <h2 className="text-lg font-bold mb-2">Enter command</h2>
-    //         <div className="relative h-10 w-full min-w-[200px] ">
-    //           <input
-    //             onChange={handleOnChange}
-    //             type="email"
-    //             placeholder="Command..."
-    //             className="peer h-full w-72 max-w-80 rounded-[7px]  !border  !border-gray-300 border-t-transparent bg-transparent bg-white px-3 py-2.5 font-sans text-sm font-normal text-blue-gray-700  shadow-lg shadow-gray-900/5 outline outline-0 ring-4 ring-transparent transition-all placeholder:text-gray-500 placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2  focus:!border-gray-900 focus:border-t-transparent focus:!border-t-gray-900 focus:outline-0 focus:ring-gray-900/10 disabled:border-0 disabled:bg-blue-gray-50"
-    //           />
-    //         </div>
-    //         {deviceError.length > 0 ? deviceErrorList : null}
-    //         <div className="mt-8">
-    //           {succeedSentSMSTo.length > 0 ? smsDevicesSucceedList : null}
-    //         </div>
-    //         <div className="mt-8">
-    //           {failedSentSMSTo.length > 0 ? smsDevicesErrorList : null}
-    //         </div>
-    //       </div>
-    //     </div>
-    //     <div className="w-2/3">
-    //       <h2 className="text-lg font-bold mb-4">Enter Device IDs</h2>
-    //       <div className="space-y-2 text-lg flex justify-center  flex-col ">
-    //         {deviceIds.map((id, index) => (
-    //           <div
-    //             key={index}
-    //             className="flex items-center justify-between  p-2 border border-gray-300 rounded "
-    //           >
-    //             <span>{id}</span>
-    //             <button
-    //               onClick={() => handleDeleteFromList(id)}
-    //               className="ml-2 text-red-500 text-4xl"
-    //             >
-    //               &times;
-    //             </button>
-    //           </div>
-    //         ))}
-    //       </div>
-    //       <div className="mt-4">
-    //         <textarea
-    //           onPaste={handlePaste}
-    //           onKeyDown={handleKeyPress}
-    //           className="w-full p-2 border border-gray-300 rounded h-32"
-    //           placeholder="Paste multiple or add and click enter device IDs here"
-    //         />
-    //         {error && <p className="text-red-500 mt-2">{error}</p>}
-    //       </div>
-    //       <div className="flex justify-center mt-4">
-    //         {disableBtn ? (
-    //           <Spinner width="8" height="8" />
-    //         ) : (
-    //           <button
-    //             disabled={disableBtn}
-    //             type="button"
-    //             className="inline-block rounded bg-neutral-800 px-6 pb-2 pt-2.5 text-sm font-medium uppercase leading-normal text-neutral-50 shadow-dark-3 transition duration-150 ease-in-out hover:bg-neutral-700 hover:shadow-dark-2 focus:bg-neutral-700 focus:shadow-dark-2 focus:outline-none focus:ring-0 active:bg-neutral-900 active:shadow-dark-2 motion-reduce:transition-none dark:shadow-black/30 dark:hover:shadow-dark-strong dark:focus:shadow-dark-strong dark:active:shadow-dark-strong"
-    //             onClick={handleOnClick}
-    //           >
-    //             Send command
-    //           </button>
-    //         )}
-    //       </div>
-    //     </div>
-    //   </div>
-    // </div>
     <div className="bg-slate-50 min-h-screen p-4">
       <div className="flex flex-col items-center">
         <Image src={logo} alt="Logo" className="m-4" width={250} />
@@ -340,7 +260,7 @@ const SMSDashboard = ({ setScreen }: Props) => {
             <div className="relative h-10 w-full min-w-[200px]">
               <input
                 onChange={handleOnChange}
-                type="email"
+                type="text"
                 placeholder="Command..."
                 className="peer h-full w-72 max-w-80 rounded-[7px] border border-gray-300  bg-transparent bg-white px-3 py-2.5 font-sans text-sm font-normal text-blue-gray-700 shadow-lg shadow-gray-900/5 outline-0 ring-4 ring-transparent transition-all placeholder:text-gray-500 placeholder-shown:border placeholder-shown:border-blue-gray-200 focus:border-2 focus:border-gray-900 focus:border-t-transparent focus:outline-0 focus:ring-gray-900/10 disabled:border-0 disabled:bg-blue-gray-50"
               />
