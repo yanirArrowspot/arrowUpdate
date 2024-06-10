@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, ClipboardEvent, KeyboardEvent, ChangeEvent } from "react";
 import InputField from "../components/form/input/InputField";
 import Image from "next/image";
