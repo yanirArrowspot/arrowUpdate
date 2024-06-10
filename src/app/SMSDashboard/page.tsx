@@ -20,7 +20,7 @@ export default function SMSDashboard({ setScreen }: Props) {
   const [deviceError, setDeviceError] = useState([]);
   const [failedSentSMSTo, setFailedSentSMSTo] = useState([]);
   const [succeedSentSMSTo, setSucceedSentSMSTo] = useState([]);
-
+  console.log("test");
   const handleOnClick = async () => {
     if (
       !command ||
