@@ -2,7 +2,6 @@
 
 import { useState, ClipboardEvent, KeyboardEvent, ChangeEvent } from "react";
 import Image from "next/image";
-
 import logo from "../../../../public/logo.png";
 import { apiCall } from "@/utils/utilApi";
 import Spinner from "@/app/components/spinner/Spinner";
@@ -10,158 +9,82 @@ import Spinner from "@/app/components/spinner/Spinner";
 type Props = {
   setScreen: React.Dispatch<React.SetStateAction<string>>;
 };
-export default function SMSDashboard({ setScreen }: Props) {
+
+export const SMSDashboard = ({ setScreen }: Props) => {
   const [deviceIds, setDeviceIds] = useState<string[]>([]);
   const [command, setCommand] = useState("");
   const [disableBtn, setDisableBtn] = useState(false);
   const [error, setError] = useState("");
-  const [deviceError, setDeviceError] = useState([]);
-  const [failedSentSMSTo, setFailedSentSMSTo] = useState([]);
-  const [succeedSentSMSTo, setSucceedSentSMSTo] = useState([]);
-  console.log("test");
+  const [deviceError, setDeviceError] = useState<string[]>([]);
+  const [failedSentSMSTo, setFailedSentSMSTo] = useState<string[]>([]);
+  const [succeedSentSMSTo, setSucceedSentSMSTo] = useState<string[]>([]);
+
   const handleOnClick = async () => {
     if (
       !command ||
       command.length === 0 ||
       !deviceIds ||
       deviceIds.length === 0
-    )
+    ) {
       setFailedSentSMSTo([]);
-    setSucceedSentSMSTo([]);
-    setDeviceError([]);
-    setError("");
-    if (deviceIds.length === 0 || !deviceIds) {
-      setError("Please enter at least one device");
-      return;
-    }
-    if (!command || command.length === 0) {
-      setError("Please enter a valid command");
-
-      return;
-    }
-    setDisableBtn(true);
-
-    const commandBase64 = btoa(command); // Convert command to Base64
-
-    const data = { deviceIds, command: commandBase64 };
-
-    try {
-      const response = await apiCall("/api/sms", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
-      console.log("ress", response);
-
-      if (response.status === 200 || response.success) {
-        console.log("wiiiiiiiiiiii");
-        console.log({ response });
-        console.log(response?.data?.failedFoundSimNumbers);
-        if (response?.data?.failedFoundSimNumbers?.length > 0)
-          setDeviceError(response?.data?.failedFoundSimNumbers);
-        if (response?.data?.deviceFailedSMS?.length > 0)
-          setFailedSentSMSTo(response?.data?.deviceFailedSMS);
-        if (response?.data?.deviceSucceedSMS?.length > 0)
-          setSucceedSentSMSTo(response?.data?.deviceSucceedSMS);
-        //   setError(JSON.stringify(response.data.failed));
-        // console.log(response.data.failed);
-        if (response.status === 401 || response?.data?.status === 401)
-          window.location.reload();
-        else if (response?.data?.statusCode === 500) {
-          setError("Something went wrong. \n please try again later.");
-          console.log("in errorrrr");
-          console.log();
-        }
-        console.log("yes");
-      } else if (response.status === 401 || response?.data?.status === 401) {
-        console.log("lol");
-        window.location.reload();
-      } else {
-        // Handle other errors
-        console.error("Error:", response.error?.message);
+      setSucceedSentSMSTo([]);
+      setDeviceError([]);
+      setError("");
+      if (deviceIds.length === 0 || !deviceIds) {
+        setError("Please enter at least one device");
+        return;
       }
-    } catch (error) {
-      console.error("Error during fetch:", error);
-    } finally {
-      console.log("finally");
-      setDisableBtn(false);
+      if (!command || command.length === 0) {
+        setError("Please enter a valid command");
+        return;
+      }
+      setDisableBtn(true);
+
+      const commandBase64 = btoa(command); // Convert command to Base64
+      const data = { deviceIds, command: commandBase64 };
+
+      try {
+        const response = await apiCall("/api/sms", {
+          method: "POST",
+          body: JSON.stringify(data),
+        });
+
+        if (response.status === 200 || response.success) {
+          if (response?.data?.failedFoundSimNumbers?.length > 0)
+            setDeviceError(response?.data?.failedFoundSimNumbers);
+          if (response?.data?.deviceFailedSMS?.length > 0)
+            setFailedSentSMSTo(response?.data?.deviceFailedSMS);
+          if (response?.data?.deviceSucceedSMS?.length > 0)
+            setSucceedSentSMSTo(response?.data?.deviceSucceedSMS);
+
+          if (response.status === 401 || response?.data?.status === 401)
+            window.location.reload();
+          else if (response?.data?.statusCode === 500) {
+            setError("Something went wrong. \n please try again later.");
+          }
+        } else if (response.status === 401 || response?.data?.status === 401) {
+          window.location.reload();
+        } else {
+          console.error("Error:", response.error?.message);
+        }
+      } catch (error) {
+        console.error("Error during fetch:", error);
+      } finally {
+        setDisableBtn(false);
+      }
     }
-    //   handleToast("warning", "Please select device and version");
-    //   return;
-    // }
-    // if (Object.keys(selectedDevices).length === 0) {
-    //   handleToast("warning", "Please select device");
-    //   return;
-    // }
-    // if (version.length === 0) {
-    //   handleToast("warning", "Please select version");
-    //   return;
-    // }
-    // // return;
-    // const devicesToUpdate = setDeviceToUpdate(selectedDevices);
-    // if (devicesToUpdate.length === 0) {
-    //   handleToast(
-    //     "warning",
-    //     `An update is already queued for version: ${version}`
-    //   );
-    //   return;
-    // }
-    // const date = new Date();
-    // const data = {
-    //   devices: devicesToUpdate,
-    //   version,
-    //   creator: email,
-    //   date: date.toLocaleString(),
-    //   ts: +date,
-    // };
-    // setDisableBtn(true);
-    // // setDisableBtn(false); //for testing
-    // // resetState();
-    // // return;
-    // try {
-    //   const response = await apiCall("/api/update/create", {
-    //     method: "POST",
-    //     body: JSON.stringify(data),
-    //   });
-    //   if (response.status === 200 || response.success) {
-    //     setSelectedDevices({});
-    //     // setToastState("success");
-    //     setVersion("");
-    //     // setIsAllDevicesSelected(false);
-    //     handleToast("success", "");
-    //   } else if (response.status === 401) {
-    //     console.log();
-    //   } else {
-    //     // Handle other errors
-    //     console.error("Error:", response.error?.message);
-    //     handleToast(
-    //       "danger",
-    //       `Something went wrong.\n\n
-    //       Please try again later.`
-    //     );
-    //   }
-    // } catch (error) {
-    //   console.error("Error during fetch:", error);
-    // } finally {
-    //   resetState();
-    // }
   };
 
-  const handleOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(event.target.value);
+  const handleOnChange = (event: ChangeEvent<HTMLInputElement>) => {
     setCommand(event.target.value);
   };
-
-  //   const handleOnClick = () => {
-  //     console.log(deviceIds);
-  //   };
 
   const handleDeleteFromList = (id: string) => {
     setDeviceIds(deviceIds.filter((deviceId) => deviceId !== id));
   };
 
   const validateId = (id: string) => {
-    const isValid = /^\d{5,8}$/.test(id);
-    return isValid;
+    return /^\d{5,8}$/.test(id);
   };
 
   const handlePaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
@@ -181,11 +104,9 @@ export default function SMSDashboard({ setScreen }: Props) {
 
   const handleKeyPress = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     setError("");
-
     if (event.key === "Enter") {
       event.preventDefault();
       const newId = (event.target as HTMLTextAreaElement).value.trim();
-
       if (validateId(newId)) {
         setDeviceIds([...deviceIds, newId]);
         (event.target as HTMLTextAreaElement).value = "";
@@ -201,37 +122,33 @@ export default function SMSDashboard({ setScreen }: Props) {
       <h2 className="my-1 text-lg text-red-600">
         Cannot find SIM numbers for:
       </h2>
-      {deviceError.map((dev: any) => {
-        return (
-          <p key={dev} className="text-red-600">
-            {dev}
-          </p>
-        );
-      })}
+      {deviceError.map((dev) => (
+        <p key={dev} className="text-red-600">
+          {dev}
+        </p>
+      ))}
     </>
   );
+
   const smsDevicesErrorList = (
     <>
       <h2 className="my-1 text-lg text-red-600">Failed to send SMS to:</h2>
-      {failedSentSMSTo.map((dev: any) => {
-        return (
-          <p key={dev} className="text-red-600">
-            {dev}
-          </p>
-        );
-      })}
+      {failedSentSMSTo.map((dev) => (
+        <p key={dev} className="text-red-600">
+          {dev}
+        </p>
+      ))}
     </>
   );
+
   const smsDevicesSucceedList = (
     <>
       <h2 className="my-1 text-lg text-green-700">Successfully sent SMS to:</h2>
-      {succeedSentSMSTo.map((dev: any) => {
-        return (
-          <p key={dev} className="text-green-700">
-            {dev}
-          </p>
-        );
-      })}
+      {succeedSentSMSTo.map((dev) => (
+        <p key={dev} className="text-green-700">
+          {dev}
+        </p>
+      ))}
     </>
   );
 
@@ -317,4 +234,4 @@ export default function SMSDashboard({ setScreen }: Props) {
       </div>
     </div>
   );
-}
+};
