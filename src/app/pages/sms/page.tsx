@@ -3,7 +3,7 @@
 import { useState, ClipboardEvent, KeyboardEvent, ChangeEvent } from "react";
 import Image from "next/image";
 
-import logo from "../../../public/logo.png";
+import logo from "../../../../public/logo.png";
 import { apiCall } from "@/utils/utilApi";
 import Spinner from "@/app/components/spinner/Spinner";
 
