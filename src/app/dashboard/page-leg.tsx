@@ -699,7 +699,7 @@ export default function Dashboard() {
           )}
         </div>
       ) : (
-        <SMSDashboard setScreen={setScreen} />
+        "test"
       )}
     </>
   );
