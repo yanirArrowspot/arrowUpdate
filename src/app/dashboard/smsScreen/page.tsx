@@ -1,18 +1,17 @@
 "use client";
 
 import { useState, ClipboardEvent, KeyboardEvent, ChangeEvent } from "react";
-import InputField from "../components/form/input/InputField";
+import InputField from "../../components/form/input/InputField";
 import Image from "next/image";
 
 import logo from "../../../public/logo.png";
 import { apiCall } from "@/utils/utilApi";
-import Spinner from "../components/spinner/Spinner";
+import Spinner from "../../components/spinner/Spinner";
 
 type Props = {
   setScreen: React.Dispatch<React.SetStateAction<string>>;
 };
-
-export const SMSDashboard = ({ setScreen }: Props) => {
+export default function SMSDashboard({ setScreen }: Props) {
   const [deviceIds, setDeviceIds] = useState<string[]>([]);
   const [command, setCommand] = useState("");
   const [disableBtn, setDisableBtn] = useState(false);
@@ -319,4 +318,4 @@ export const SMSDashboard = ({ setScreen }: Props) => {
       </div>
     </div>
   );
-};
+}
