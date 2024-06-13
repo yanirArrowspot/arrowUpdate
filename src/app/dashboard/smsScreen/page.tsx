@@ -4,7 +4,7 @@ import { useState, ClipboardEvent, KeyboardEvent, ChangeEvent } from "react";
 import InputField from "../../components/form/input/InputField";
 import Image from "next/image";
 
-import logo from "../../../public/logo.png";
+import logo from "../../../../public/logo.png";
 import { apiCall } from "@/utils/utilApi";
 import Spinner from "../../components/spinner/Spinner";
 
