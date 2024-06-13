@@ -1,44 +1,76 @@
 "use client";
-
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  ClipboardEvent,
-  KeyboardEvent,
-} from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+
 import Image from "next/image";
-import Spinner from "../components/spinner/Spinner";
-import Toast from "../components/toast/Toast";
-import Dialog from "../components/dialog/Dialog";
 import Devices from "../components/list/Devices";
-import { useDevicesStore, useUserStore } from "@/store/store";
 import logo from "../../../public/logo.png";
 import { apiCall } from "@/utils/utilApi";
+import Toast from "../components/toast/Toast";
+import Spinner from "../components/spinner/Spinner";
+import { useDevicesStore, useUserStore } from "@/store/store";
+import Dialog from "../components/dialog/Dialog";
+import { pbkdf2Sync, randomBytes } from "crypto";
+import SMSDashboard from "./smsScreen/page";
 
 export default function Dashboard() {
   const router = useRouter();
   const { email } = useUserStore((state) => state.user);
-  const { devices, setDevices, selectedDevices, setSelectedDevices } =
-    useDevicesStore((state) => state);
+  const setDevices = useDevicesStore((state) => state.setDevices);
+  const { devices, selectedDevices, setSelectedDevices } = useDevicesStore(
+    (state) => state
+  );
 
   const [version, setVersion] = useState("");
   const [toastState, setToastState] = useState("");
-  const [toastText, setToastText] = useState("");
   const [disableBtn, setDisableBtn] = useState(false);
+  const [toastText, setToastText] = useState("");
   const [versions, setVersions] = useState([]);
   const [isAllDevicesSelected, setIsAllDevicesSelected] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [screen, setScreen] = useState("update");
 
-  // SMS states
+  //sms state
+
   const [deviceIds, setDeviceIds] = useState<string[]>([]);
   const [command, setCommand] = useState("");
   const [error, setError] = useState("");
   const [deviceError, setDeviceError] = useState([]);
   const [failedSentSMSTo, setFailedSentSMSTo] = useState([]);
   const [succeedSentSMSTo, setSucceedSentSMSTo] = useState([]);
+
+  // const fetchAllDevices = async () => {
+  //   try {
+  //     // const response = await fetch("/api/devices", {
+  //     //   method: "GET",
+  //     //   headers: {
+  //     //     "Content-Type": "application/json",
+  //     //   },
+  //     //   credentials: "include",
+  //     // });
+  //     const response = await apiCall("/api/devices", {
+  //       method: "GET",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       credentials: "include",
+  //     });
+  //     const result = "";
+  //     // const result = await response.json();
+  //     if (response.success) {
+  //       // setDevices(result.body.things);
+  //       await fetchAllJobs(response?.data.body.things);
+  //       setVersions(response?.data?.body.versions);
+  //       // setDevicesToDisplay(result.body.things);
+  //     } else {
+  //       // Handle errors
+  //       console.error("Login failed");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error during fetch:", error);
+  //   }
+  //   // Handle response
+  // };
 
   type ApiResponse = {
     success: boolean;
@@ -126,7 +158,172 @@ export default function Dashboard() {
     fetchAllDevices();
   }, [fetchAllDevices]);
 
-  console.log("test");
+  const setDeviceToUpdate = (selectedDevices: Record<string, boolean>) => {
+    const devicesToUpdate: any[] = [];
+
+    devices.forEach((device) => {
+      if (
+        selectedDevices.hasOwnProperty(device.thingName) &&
+        device?.attributes?.target_software_version !== version
+      ) {
+        devicesToUpdate.push(device.thingArn);
+      }
+    });
+
+    return devicesToUpdate;
+  };
+
+  const handleCheckboxChange = (deviceId: string) => {
+    setSelectedDevices((prev) => ({
+      ...prev,
+      [deviceId]: !prev[deviceId],
+    }));
+  };
+  const handleSelectAllDevices = () => {
+    const selectedAll: any = {};
+
+    if (!isAllDevicesSelected) {
+      for (const device of devices) {
+        const thingName = device.thingName;
+        selectedAll[thingName] = true;
+      }
+      setSelectedDevices(selectedAll);
+    } else {
+      setSelectedDevices({});
+    }
+    setIsAllDevicesSelected((prev) => !prev);
+  };
+
+  const handleToast = (toastState: string, toastText: string) => {
+    setToastState(toastState);
+    setToastText(toastText);
+    setTimeout(() => {
+      setToastState("");
+      setToastText("");
+      setDisableBtn(false);
+    }, 6000);
+  };
+
+  const filterSelectedDevices = () => {
+    const devices = selectedDevices;
+    for (const key in devices) {
+      if (!devices[key]) delete devices[key];
+    }
+    setSelectedDevices(devices);
+  };
+
+  const handleOnUpdateButtonSubmit = () => {
+    const condition =
+      Object.keys(selectedDevices).length === devices.length &&
+      isAllDevicesSelected &&
+      version;
+
+    if (condition) {
+      setShowModal(true);
+    } else if (!condition) {
+      filterSelectedDevices();
+      handleOnUpdateDevices();
+    }
+
+    // return;
+  };
+
+  const resetState = () => {
+    setSelectedDevices({});
+    setVersion("");
+    setIsAllDevicesSelected(false);
+    setDisableBtn(false);
+  };
+
+  const handleOnUpdateDevices = async () => {
+    if (Object.keys(selectedDevices).length === 0 && version.length === 0) {
+      handleToast("warning", "Please select device and version");
+      return;
+    }
+
+    if (Object.keys(selectedDevices).length === 0) {
+      handleToast("warning", "Please select device");
+      return;
+    }
+    if (version.length === 0) {
+      handleToast("warning", "Please select version");
+      return;
+    }
+
+    // return;
+
+    const devicesToUpdate = setDeviceToUpdate(selectedDevices);
+    if (devicesToUpdate.length === 0) {
+      handleToast(
+        "warning",
+        `An update is already queued for version: ${version}`
+      );
+      return;
+    }
+    const date = new Date();
+    const data = {
+      devices: devicesToUpdate,
+      version,
+      creator: email,
+      date: date.toLocaleString(),
+      ts: +date,
+    };
+    setDisableBtn(true);
+    // setDisableBtn(false); //for testing
+    // resetState();
+
+    // return;
+
+    try {
+      const response = await apiCall("/api/update/create", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+
+      if (response.status === 200 || response.success) {
+        setSelectedDevices({});
+        // setToastState("success");
+        setVersion("");
+        // setIsAllDevicesSelected(false);
+        handleToast("success", "");
+      } else if (response.status === 401) {
+        console.log();
+      } else {
+        // Handle other errors
+        console.error("Error:", response.error?.message);
+        handleToast(
+          "danger",
+          `Something went wrong.\n\n
+          Please try again later.`
+        );
+      }
+    } catch (error) {
+      console.error("Error during fetch:", error);
+    } finally {
+      resetState();
+    }
+  };
+
+  const handleSMSScreen = () => {
+    setScreen("sms");
+  };
+
+  const handleCloseDialog = () => {
+    setShowModal(false);
+    resetState();
+  };
+  const dialog = (
+    <Dialog
+      onClose={handleCloseDialog}
+      onSubmit={handleOnUpdateDevices}
+      title="Warning"
+    >
+      <p className="text-lg text-gray-600 text-center">
+        Are you sure you want to update all devices to version: {version} ?
+      </p>
+    </Dialog>
+  );
+
   const handleOnClick = async () => {
     if (
       !command ||
@@ -342,178 +539,6 @@ export default function Dashboard() {
       })}
     </>
   );
-  const handleSMSScreen = () => {
-    setScreen("sms");
-  };
-
-  const resetState = () => {
-    setSelectedDevices({});
-    setVersion("");
-    setIsAllDevicesSelected(false);
-    setDisableBtn(false);
-  };
-  const resetSMSState = () => {
-    setDeviceIds([]);
-    setCommand("");
-    setError("");
-    setDeviceError([]);
-    setFailedSentSMSTo([]);
-    setSucceedSentSMSTo([]);
-  };
-
-  const handleCloseDialog = () => {
-    setShowModal(false);
-    resetState();
-  };
-
-  const handleToast = (toastState: string, toastText: string) => {
-    setToastState(toastState);
-    setToastText(toastText);
-    setTimeout(() => {
-      setToastState("");
-      setToastText("");
-      setDisableBtn(false);
-    }, 6000);
-  };
-
-  const filterSelectedDevices = () => {
-    const devices = selectedDevices;
-    for (const key in devices) {
-      if (!devices[key]) delete devices[key];
-    }
-    setSelectedDevices(devices);
-  };
-
-  const handleOnUpdateDevices = async () => {
-    if (Object.keys(selectedDevices).length === 0 && version.length === 0) {
-      handleToast("warning", "Please select device and version");
-      return;
-    }
-
-    if (Object.keys(selectedDevices).length === 0) {
-      handleToast("warning", "Please select device");
-      return;
-    }
-    if (version.length === 0) {
-      handleToast("warning", "Please select version");
-      return;
-    }
-
-    const setDeviceToUpdate = (selectedDevices: Record<string, boolean>) => {
-      const devicesToUpdate: any[] = [];
-
-      devices.forEach((device) => {
-        if (
-          selectedDevices.hasOwnProperty(device.thingName) &&
-          device?.attributes?.target_software_version !== version
-        ) {
-          devicesToUpdate.push(device.thingArn);
-        }
-      });
-
-      return devicesToUpdate;
-    };
-    const devicesToUpdate = setDeviceToUpdate(selectedDevices);
-    if (devicesToUpdate.length === 0) {
-      handleToast(
-        "warning",
-        `An update is already queued for version: ${version}`
-      );
-      return;
-    }
-    const date = new Date();
-    const data = {
-      devices: devicesToUpdate,
-      version,
-      creator: email,
-      date: date.toLocaleString(),
-      ts: +date,
-    };
-    setDisableBtn(true);
-    // setDisableBtn(false); //for testing
-    // resetState();
-
-    // return;
-
-    try {
-      const response = await apiCall("/api/update/create", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
-
-      if (response.status === 200 || response.success) {
-        setSelectedDevices({});
-        // setToastState("success");
-        setVersion("");
-        // setIsAllDevicesSelected(false);
-        handleToast("success", "");
-      } else if (response.status === 401) {
-        console.log();
-      } else {
-        // Handle other errors
-        console.error("Error:", response.error?.message);
-        handleToast(
-          "danger",
-          `Something went wrong.\n\n
-          Please try again later.`
-        );
-      }
-    } catch (error) {
-      console.error("Error during fetch:", error);
-    } finally {
-      resetState();
-    }
-  };
-
-  const handleSelectAllDevices = () => {
-    const selectedAll: any = {};
-
-    if (!isAllDevicesSelected) {
-      for (const device of devices) {
-        const thingName = device.thingName;
-        selectedAll[thingName] = true;
-      }
-      setSelectedDevices(selectedAll);
-    } else {
-      setSelectedDevices({});
-    }
-    setIsAllDevicesSelected((prev) => !prev);
-  };
-
-  const handleCheckboxChange = (deviceId: string) => {
-    setSelectedDevices((prev) => ({
-      ...prev,
-      [deviceId]: !prev[deviceId],
-    }));
-  };
-
-  const handleOnUpdateButtonSubmit = () => {
-    const condition =
-      Object.keys(selectedDevices).length === devices.length &&
-      isAllDevicesSelected &&
-      version;
-
-    if (condition) {
-      setShowModal(true);
-    } else if (!condition) {
-      filterSelectedDevices();
-      handleOnUpdateDevices();
-    }
-
-    // return;
-  };
-
-  const dialog = (
-    <Dialog
-      onClose={handleCloseDialog}
-      onSubmit={handleOnUpdateDevices}
-      title="Warning"
-    >
-      <p className="text-lg text-gray-600 text-center">
-        Are you sure you want to update all devices to version: {version} ?
-      </p>
-    </Dialog>
-  );
 
   const dashboard = (
     <>
@@ -630,93 +655,40 @@ export default function Dashboard() {
         <h1 className="text-3xl font-bold mb-2 text-center text-cyan-950">
           ArrowSpot SMS Sender
         </h1>
+        <input
+          type="text"
+          placeholder="Command..."
+          value={command}
+          onChange={(e) => setCommand(e.target.value)}
+          className="input"
+        />
+        <textarea
+          placeholder="Enter device IDs"
+          onChange={(e) => {
+            const ids = e.target.value.split(",");
+            setDeviceIds(ids.map((id) => id.trim()));
+          }}
+          className="textarea"
+        />
         <button
+          onClick={handleOnClickSMS}
           disabled={disableBtn}
-          type="button"
-          className="mb-2 inline-block rounded bg-neutral-800 px-6 pb-2 pt-2.5 m-1 text-sm font-medium uppercase leading-normal text-neutral-50 shadow-dark-3 transition duration-150 ease-in-out hover:bg-neutral-700 focus:outline-none focus:ring-0 active:bg-neutral-900"
-          onClick={() => setScreen("update")}
+          className="button"
         >
-          Update Screen
+          Send SMS
         </button>
-      </div>
-      <div className="p-6 px-12 flex flex-col lg:flex-row-reverse gap-4 rounded-[7px] border-2 border-gray-300">
-        <div className="lg:w-1/3 justify-center">
-          <div className="max-w-md">
-            <h2 className="text-lg font-bold mb-4">Enter command</h2>
-            <div className="relative h-10 w-full min-w-[200px]">
-              <input
-                onChange={handleOnChange}
-                value={command}
-                type="text"
-                placeholder="Command..."
-                className="peer h-full w-72 max-w-80 rounded-[7px] border border-gray-300  bg-transparent bg-white px-3 py-2.5 font-sans text-sm font-normal text-blue-gray-700 shadow-lg shadow-gray-900/5 outline-0 ring-4 ring-transparent transition-all placeholder:text-gray-500 placeholder-shown:border placeholder-shown:border-blue-gray-200 focus:border-2 focus:border-gray-900 focus:border-t-transparent focus:outline-0 focus:ring-gray-900/10 disabled:border-0 disabled:bg-blue-gray-50"
-              />
-            </div>
-            {deviceError.length > 0 && deviceErrorList}
-            <div className="mt-8">
-              {succeedSentSMSTo.length > 0 && smsDevicesSucceedList}
-            </div>
-            <div className="mt-8">
-              {failedSentSMSTo.length > 0 && smsDevicesErrorList}
-            </div>
-          </div>
-        </div>
-        <div className="lg:w-2/3">
-          <h2 className="text-lg font-bold ">Enter Device IDs</h2>
-          <div className="space-y-2 text-lg flex flex-col">
-            {deviceIds.map((id, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-2 border border-gray-300 rounded"
-              >
-                <span>{id}</span>
-                <button
-                  onClick={() => handleDeleteFromList(id)}
-                  className="ml-2 text-red-500 text-4xl"
-                >
-                  &times;
-                </button>
-              </div>
+        {error && <div className="error">{error}</div>}
+        {deviceError.length > 0 && (
+          <div className="error-list">
+            <p>Device errors:</p>
+            {deviceError.map((err, index) => (
+              <div key={index}>{err}</div>
             ))}
           </div>
-          <div className="mt-4">
-            <textarea
-              onPaste={handlePaste}
-              onKeyDown={handleKeyPress}
-              className="w-full p-2 border border-gray-300 rounded h-32"
-              placeholder="Paste multiple or add and click enter device IDs here"
-            />
-            {error && <p className="text-red-500 mt-2">{error}</p>}
-          </div>
-          <div className="flex justify-center mt-4">
-            {disableBtn ? (
-              <Spinner width="8" height="8" />
-            ) : (
-              <div className="flex flex-col gap-4">
-                <button
-                  disabled={disableBtn}
-                  type="button"
-                  className="inline-block rounded bg-neutral-800 px-6 pb-2 pt-2.5 text-sm font-medium uppercase leading-normal text-neutral-50 shadow-dark-3 transition duration-150 ease-in-out hover:bg-neutral-700 focus:outline-none focus:ring-0 active:bg-neutral-900"
-                  onClick={handleOnClick}
-                >
-                  Send command
-                </button>
-                <button
-                  disabled={disableBtn}
-                  type="button"
-                  className="inline-block rounded bg-slate-400 px-6 pb-2 pt-2.5 text-sm font-medium uppercase leading-normal text-neutral-50 shadow-dark-3 transition duration-150 ease-in-out hover:bg-slate-500 focus:outline-none focus:ring-0 active:bg-neutral-900"
-                  onClick={resetSMSState}
-                >
-                  Reset All
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
-
   return (
     <>
       {screen === "update" ? (
@@ -728,7 +700,7 @@ export default function Dashboard() {
           )}
         </div>
       ) : (
-        smsSection
+        <SMSDashboard setScreen={setScreen} />
       )}
     </>
   );
