@@ -154,13 +154,13 @@ export default function Dashboard() {
     const data = { deviceIds, command: commandBase64 };
 
     try {
-      const response = await apiCall("/api/sms", {
+      const response = (await apiCall("/api/sms", {
         method: "POST",
         body: JSON.stringify(data),
-      });
+      })) as any;
       console.log("ress", response);
 
-      if (response.status === 200 || response.success) {
+      if (response?.status === 200 || response.success) {
         console.log("wiiiiiiiiiiii");
         console.log({ response });
         console.log(response?.data?.failedFoundSimNumbers);
